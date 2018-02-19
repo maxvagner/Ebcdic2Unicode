@@ -38,6 +38,11 @@ namespace Ebcdic2Unicode
             }
         }
 
+        //Constructor 3
+        public LineTemplate(XElement lineTemplateXml)
+        {
+            this.InitializeLineTemplateFromXml(lineTemplateXml);
+        }
 
 
         private void PopulateInitialObjectProperties(int lineSize, string templateName)

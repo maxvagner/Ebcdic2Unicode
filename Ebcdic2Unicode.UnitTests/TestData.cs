@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Ebcdic2Unicode.UnitTests
 {
@@ -30,6 +32,28 @@ namespace Ebcdic2Unicode.UnitTests
             lineTemplate.AddFieldTemplate(new FieldTemplate(FieldDateOfBirth, FieldType.PackedDate, 69, 4));
             return lineTemplate;
         }
+
+        public static LineTemplate GetLineTemplateToParseEbcidicDataWithFixedRecordLengthFromXml()
+        {
+            var xmlString = GetLineTemplateToParseEbcidicDataWithFixedRecordLength().GetLineTemplateXmlString();
+            //"<lineTemplate Name=\"ReservationsData\" Length=\"73\">" +
+            //"  <fields>" +
+            //"    <fieldTemplate Name=\""+ FieldReservationNumber + "\" Type=\"String\" StartPosition=\"0\" Size=\"11\" />" +
+            //"    <fieldTemplate Name=\""+ FieldCheckInDate + "\" Type=\"DateString\" StartPosition=\"11\" Size=\"6\" />" +
+            //"    <fieldTemplate Name=\""+ FieldCalcNetAmount + "\" Type=\"BinaryNum\" StartPosition=\"17\" Size=\"4\" DecimalPlaces=\"2\" />" +
+            //"    <fieldTemplate Name=\""+ FieldCustomerName + "\" Type=\"String\" StartPosition=\"21\" Size=\"30\" />" +
+            //"    <fieldTemplate Name=\""+ FieldRunDate + "\" Type=\"DateStringMMDDYY\" StartPosition=\"51\" Size=\"6\" />" +
+            //"    <fieldTemplate Name=\""+ FieldCurrencyConvRate + "\" Type=\"Packed\" StartPosition=\"57\" Size=\"6\" DecimalPlaces=\"6\" />" +
+            //"    <fieldTemplate Name=\""+ FieldUsDollarAmountDue + "\" Type=\"Packed\" StartPosition=\"63\" Size=\"6\" DecimalPlaces=\"2\" />" +
+            //"    <fieldTemplate Name=\""+ FieldDateOfBirth + "\" Type=\"PackedDate\" StartPosition=\"69\" Size=\"4\" />" +
+            //"  </fields>" +
+            //"</lineTemplate>";
+
+            var lineTemplateXml = XElement.Parse(xmlString);
+
+            return new LineTemplate(lineTemplateXml);
+        }
+
 
         /// <summary>
         /// Sample EBCDIC binary data.

@@ -46,8 +46,10 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LineTemplateUnitTests.cs" />
     <Compile Include="TestData.cs" />
     <Compile Include="ParserUnitTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
