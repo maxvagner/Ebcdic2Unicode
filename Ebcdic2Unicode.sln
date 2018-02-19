@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ebcdic2Unicode", "Ebcdic2Unicode\Ebcdic2Unicode.csproj", "{97038156-3384-4146-A779-8E990601FC02}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ebcdic2Unicode.UnitTests", "Ebcdic2Unicode.UnitTests\Ebcdic2Unicode.UnitTests.csproj", "{02B52A76-4DD0-4440-A466-1BCC836EC743}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +17,15 @@ Global
 		{97038156-3384-4146-A779-8E990601FC02}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97038156-3384-4146-A779-8E990601FC02}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97038156-3384-4146-A779-8E990601FC02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02B52A76-4DD0-4440-A466-1BCC836EC743}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02B52A76-4DD0-4440-A466-1BCC836EC743}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02B52A76-4DD0-4440-A466-1BCC836EC743}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02B52A76-4DD0-4440-A466-1BCC836EC743}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {65F48689-1C80-4636-97B4-064D9803FB43}
 	EndGlobalSection
 EndGlobal
