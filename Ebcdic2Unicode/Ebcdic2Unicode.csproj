@@ -40,6 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants\Fields.cs" />
+    <Compile Include="Constants\Formats.cs" />
+    <Compile Include="Constants\Messages.cs" />
     <Compile Include="CustomIbm935Mapper.cs" />
     <Compile Include="EbcdicParser.cs" />
     <Compile Include="Enums.cs" />

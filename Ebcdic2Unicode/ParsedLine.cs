@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ebcdic2Unicode.Constants;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -62,7 +63,7 @@ namespace Ebcdic2Unicode
         {
             if (lineBytes == null)
             {
-                throw new ArgumentNullException("Line bytes required");
+                throw new ArgumentNullException(Messages.LineBytesRequired);
             }
             if (lineBytes.Length < template.LineSize)
             {
@@ -71,11 +72,11 @@ namespace Ebcdic2Unicode
             }
             if (template == null)
             {
-                throw new ArgumentNullException("line template is required");
+                throw new ArgumentNullException(Messages.LineTemplateRequired);
             }
             if (template.FieldsCount == 0)
             {
-                throw new Exception("Field templates have not been defined in the line template");
+                throw new Exception(Messages.FieldTemplatesNotDefined);
             }
         }
 
@@ -90,7 +91,7 @@ namespace Ebcdic2Unicode
         {
             if (String.IsNullOrWhiteSpace(fieldName))
             {
-                throw new Exception("Field name is NULL or empty");
+                throw new Exception(Messages.InvalidFieldName);
             }
             return this.ParsedFields[fieldName].Text.Trim();
         }
@@ -119,10 +120,10 @@ namespace Ebcdic2Unicode
 
         public XElement ToXml(bool includeSrcBytesInHex = false)
         {
-            XElement lineEl = new XElement("line");
-            lineEl.Add(new XAttribute("TemplateName", this.Template.LineTemplateName));
+            XElement lineEl = new XElement(Fields.XmlLine);
+            lineEl.Add(new XAttribute(Fields.TemplateName, this.Template.LineTemplateName));
 
-            XElement fields = new XElement("fields");
+            XElement fields = new XElement(Fields.XmlFields);
             lineEl.Add(fields);
 
             foreach (ParsedField parsedField in this.ParsedFields.Values)

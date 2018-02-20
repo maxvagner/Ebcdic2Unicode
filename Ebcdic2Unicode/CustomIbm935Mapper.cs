@@ -19,7 +19,7 @@ namespace Ebcdic2Unicode
         {
             if (ebcdicBytes == null || ebcdicBytes.Length == 0)
             {
-                return "";
+                return string.Empty;
             }
 
             StringBuilder sb = new StringBuilder();

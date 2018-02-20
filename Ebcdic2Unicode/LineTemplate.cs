@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ebcdic2Unicode.Constants;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,8 +11,11 @@ namespace Ebcdic2Unicode
     public class LineTemplate
     {
         public Dictionary<string, FieldTemplate> FieldTemplates = new Dictionary<string, FieldTemplate>();
+
         public string LineTemplateName { get; private set; }
+
         public int LineSize { get; private set; }
+
         public int FieldsCount
         {
             get
@@ -50,7 +54,7 @@ namespace Ebcdic2Unicode
             //Console.WriteLine("Initiaising template '{0}'...", templateName);
             if (lineSize <= 0)
             {
-                throw new ArgumentOutOfRangeException("line length must be greater than zero");
+                throw new ArgumentOutOfRangeException(Messages.LineLengthTooShort);
             }
             this.LineTemplateName = templateName;
             this.LineSize = lineSize;
@@ -66,11 +70,11 @@ namespace Ebcdic2Unicode
             //  </fields>
             //</lineTemplate>
 
-            int lineSize = ParserUtilities.GetAttributeNumericValue(lineTemplaeXml, "Length");
-            string templateName = ParserUtilities.GetCompulsoryAttributeValue(lineTemplaeXml, "Name");
+            int lineSize = ParserUtilities.GetAttributeNumericValue(lineTemplaeXml, Fields.Length);
+            string templateName = ParserUtilities.GetCompulsoryAttributeValue(lineTemplaeXml, Fields.Name);
             this.PopulateInitialObjectProperties(lineSize, templateName);
 
-            foreach (XElement fieldXml in lineTemplaeXml.Element("fields").Elements("fieldTemplate"))
+            foreach (XElement fieldXml in lineTemplaeXml.Element(Fields.XmlFields).Elements(Fields.XmlFieldTemplate))
             {
                 FieldTemplate fieldTemplate = new FieldTemplate(fieldXml);
                 this.AddFieldTemplate(fieldTemplate);
@@ -81,7 +85,7 @@ namespace Ebcdic2Unicode
         {
             if ((fieldTemplate.StartPosition + fieldTemplate.FieldSize) > this.LineSize)
             {
-                throw new Exception(String.Format("Field \"{0}\" exceeds line boundary", fieldTemplate.FieldName));
+                throw new Exception(String.Format(Messages.FieldExceedsLineBoundary, fieldTemplate.FieldName));
             }
             this.FieldTemplates.Add(fieldTemplate.FieldName, fieldTemplate);
         }
@@ -114,11 +118,11 @@ namespace Ebcdic2Unicode
                 templateName = this.LineTemplateName;
             }
 
-            XElement lineXml = new XElement("lineTemplate");
-            lineXml.Add(new XAttribute("Name", templateName));
-            lineXml.Add(new XAttribute("Length", this.LineSize));
+            XElement lineXml = new XElement(Fields.XmlLineTemplate);
+            lineXml.Add(new XAttribute(Fields.Name, templateName));
+            lineXml.Add(new XAttribute(Fields.Length, this.LineSize));
 
-            XElement fields = new XElement("fields");
+            XElement fields = new XElement(Fields.XmlFields);
             lineXml.Add(fields);
 
             foreach (FieldTemplate field in FieldTemplates.Values)
@@ -139,7 +143,7 @@ namespace Ebcdic2Unicode
         {
             if (File.Exists(outputXmlFilePath))
             {
-                throw new Exception(String.Format("File '{0}' alredy exists", outputXmlFilePath));
+                throw new Exception(String.Format(Messages.FileAlreadyExists, outputXmlFilePath));
             }
 
             XElement templateXml = this.GetLineTemplateXml();

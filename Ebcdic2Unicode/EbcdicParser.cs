@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ebcdic2Unicode.Constants;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -34,6 +35,12 @@ namespace Ebcdic2Unicode
         #endregion
 
 
+        /// <summary>
+        /// Parses multiple lines of binary data.
+        /// </summary>
+        /// <param name="lineTemplate">Template</param>
+        /// <param name="allBytes">Source file bytes</param>
+        /// <returns>Array of parsed lines</returns>
         public ParsedLine[] ParseAllLines(LineTemplate lineTemplate, byte[] allBytes)
         {
             Console.WriteLine("{0}: Parsing...", DateTime.Now);
@@ -81,12 +88,24 @@ namespace Ebcdic2Unicode
             return linesList.ToArray();
         }
 
+        /// <summary>
+        /// Parses multiple lines of binary data.
+        /// </summary>
+        /// <param name="lineTemplate">Template</param>
+        /// <param name="sourceFilePath">Source file path</param>
+        /// <returns>Array of parsed lines</returns>
         public ParsedLine[] ParseAllLines(LineTemplate lineTemplate, string sourceFilePath)
         {
             Console.WriteLine("{1}: Reading {2}...", sourceFilePath, DateTime.Now);
             return this.ParseAllLines(lineTemplate, File.ReadAllBytes(sourceFilePath));
         }
 
+        /// <summary>
+        /// Parses single line of binary data.
+        /// </summary>
+        /// <param name="lineTemplate">Template</param>
+        /// <param name="lineBytes">Source bytes</param>
+        /// <returns>Single parsed line</returns>
         public ParsedLine ParseSingleLine(LineTemplate lineTemplate, byte[] lineBytes)
         {
             bool isSingleLine = true;
@@ -99,30 +118,30 @@ namespace Ebcdic2Unicode
         {
             if (allBytes == null)
             {
-                throw new ArgumentNullException("Ebcdic data is not provided");
+                throw new ArgumentNullException(Messages.DataNotProvided);
             }
             if (lineTemplate == null)
             {
-                throw new ArgumentNullException("Line template is not provided");
+                throw new ArgumentNullException(Messages.LineTemplateNotProvided);
             }
             if (lineTemplate.FieldsCount == 0)
             {
-                throw new Exception("Line template must contain at least one field template");
+                throw new Exception(Messages.LineTemplateHasNoFields);
             }
             if (allBytes.Length > 0 && allBytes.Length < lineTemplate.LineSize)
             {
-                throw new Exception("Data length is shorter than the line size");
+                throw new Exception(Messages.DataShorterThanExpected);
             }
             if (isSingleLine && allBytes.Length != lineTemplate.LineSize)
             {
-                throw new Exception("Bytes count doesn't equal to line size");
+                throw new Exception(Messages.DataLengthDifferentThanExpected);
             }
 
             double expectedRows = (double)allBytes.Length / lineTemplate.LineSize;
 
             if (expectedRows % 1 != 0) //Expected number of rows is not a whole number
             {
-                string errMsg = String.Format("Data bytes = {0}; line size = {1}; line count check = {2:#,###.00}.\r\nExpected number of rows is not a whole number. Check line template.", allBytes.Length, lineTemplate.LineSize, expectedRows);
+                string errMsg = String.Format(Messages.ExpectedNumberOfRows, allBytes.Length, lineTemplate.LineSize, expectedRows);
                 throw new Exception(errMsg);
             }
 

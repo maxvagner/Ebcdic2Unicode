@@ -5,16 +5,18 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Xml.Linq;
+using Ebcdic2Unicode.Constants;
 
 namespace Ebcdic2Unicode
 {
     public class ParsedField
     {
-        private const string yyyy_MM_dd = "yyyy-MM-dd";
-
         public FieldTemplate Template { get; private set; }
+
         public string Text { get; private set; }
+
         public byte[] OriginalBytes { get; private set; }
+
         public string OriginalBytesBase16
         {
             get
@@ -22,6 +24,7 @@ namespace Ebcdic2Unicode
                 return ParserUtilities.ConvertBytesToStringBase16(this.OriginalBytes);
             }
         }
+
         public string OriginalBytesBase10
         {
             get
@@ -29,6 +32,7 @@ namespace Ebcdic2Unicode
                 return ParserUtilities.ConvertBytesToStringBase10(this.OriginalBytes);
             }
         }
+
         public string OriginalBytesBase2
         {
             get
@@ -36,6 +40,7 @@ namespace Ebcdic2Unicode
                 return ParserUtilities.ConvertBytesToStringBase2(this.OriginalBytes);
             }
         }
+
         public bool ParsedSuccessfully { get; private set; }
 
 
@@ -64,11 +69,11 @@ namespace Ebcdic2Unicode
             {
                 ParserUtilities.PrintError("lineBytes array is null or empty");
                 isParsedSuccessfully = false;
-                return "";
+                return string.Empty;
             }
             if (lineBytes.Length < (fieldTemplate.StartPosition + fieldTemplate.FieldSize))
             {
-                throw new Exception(String.Format("Field \"{0}\" length falls outside the line length", fieldTemplate.FieldName));
+                throw new Exception(String.Format(Messages.FieldOutsideLineBoundary, fieldTemplate.FieldName));
             }
 
             byte[] fieldBytes = new byte[fieldTemplate.FieldSize];
@@ -102,7 +107,7 @@ namespace Ebcdic2Unicode
             }
             else if (fieldTemplate.Type == FieldType.DateStringMMDDYY)
             {
-                return this.ConvertEbcdicCustomDateStr(fieldBytes, "MMddyy", yyyy_MM_dd, out isParsedSuccessfully);
+                return this.ConvertEbcdicCustomDateStr(fieldBytes, Formats.MMDDYY, Formats.YYYY_MM_DD, out isParsedSuccessfully);
             }
             else if (fieldTemplate.Type == FieldType.SourceBytesBase16)
             {
@@ -126,7 +131,7 @@ namespace Ebcdic2Unicode
             }
             else
             {
-                throw new Exception(String.Format("Unable to parse field \"{0}\". Parser not implemented for field type \"{1}\"", fieldTemplate.FieldName, fieldTemplate.Type.ToString()));
+                throw new Exception(String.Format(Messages.ParserNotImplemented, fieldTemplate.FieldName, fieldTemplate.Type.ToString()));
             }
         }
 
@@ -135,7 +140,7 @@ namespace Ebcdic2Unicode
             if (ebcdicBytes.All(p => p == 0x00 || p == 0xFF))
             {
                 //Every byte is either 0x00 or 0xFF (fillers)
-                return "";
+                return string.Empty;
             }
 
             Encoding ebcdicEnc = Encoding.GetEncoding("IBM037");
@@ -147,15 +152,15 @@ namespace Ebcdic2Unicode
         {
             string tempNumStr = this.ConvertEbcdicString(ebcdicBytes).Trim();
 
-            if (tempNumStr == "")
+            if (tempNumStr == string.Empty)
             {
                 isParsedSuccessfully = true;
-                return "";
+                return string.Empty;
             }
             if (String.IsNullOrWhiteSpace(tempNumStr))
             {
                 isParsedSuccessfully = false;
-                return "";
+                return string.Empty;
             }
 
             if (Regex.IsMatch(tempNumStr, @"^\d+$")) //Unsigned integer
@@ -252,7 +257,7 @@ namespace Ebcdic2Unicode
                         parsedNumber = Int64.Parse(tempNumStr) * (-1);
                         break;
                     default:
-                        throw new Exception(String.Format("Unable to convert \"{0}\" strng to number", tempNumStr));
+                        throw new Exception(String.Format(Messages.UnableToConvertStringToNumber, tempNumStr));
                 }
 
                 isParsedSuccessfully = true;
@@ -273,19 +278,19 @@ namespace Ebcdic2Unicode
         {
             string text = this.ConvertEbcdicString(ebcdicBytes).Trim();
 
-            if (text == "" || Regex.IsMatch(text, "^0+$") || Regex.IsMatch(text, "^9+$"))
+            if (text == string.Empty || Regex.IsMatch(text, "^0+$") || Regex.IsMatch(text, "^9+$"))
             {
                 isParsedSuccessfully = true;
-                return "";
+                return string.Empty;
             }
 
             DateTime tempDate;
             if (text.Length == 6 && Regex.IsMatch(text, @"^\d{6}$"))
             {
-                if (DateTime.TryParseExact(text, "yyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out tempDate))
+                if (DateTime.TryParseExact(text, Formats.YYMMDD, CultureInfo.InvariantCulture, DateTimeStyles.None, out tempDate))
                 {
                     isParsedSuccessfully = true;
-                    return tempDate.ToString(yyyy_MM_dd);
+                    return tempDate.ToString(Formats.YYYY_MM_DD);
                 }
             }
             if (text.Length == 7 && Regex.IsMatch(text, @"^\d{7}$"))
@@ -295,10 +300,10 @@ namespace Ebcdic2Unicode
             }
             if (text.Length == 8 && Regex.IsMatch(text, @"^\d{8}$"))
             {
-                if (DateTime.TryParseExact(text, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out tempDate))
+                if (DateTime.TryParseExact(text, Formats.YYYYMMDD, CultureInfo.InvariantCulture, DateTimeStyles.None, out tempDate))
                 {
                     isParsedSuccessfully = true;
-                    return tempDate.ToString(yyyy_MM_dd);
+                    return tempDate.ToString(Formats.YYYY_MM_DD);
                 }
             }
 
@@ -352,7 +357,7 @@ namespace Ebcdic2Unicode
             if (cyyMMdd_dateStr == "0000000" || cyyMMdd_dateStr == "0999999" || cyyMMdd_dateStr == "9999999") //cyyMMdd_dateStr == "0"
             {
                 isParsedSuccessfully = true;
-                return "";
+                return string.Empty;
             }
 
             Match match = Regex.Match(cyyMMdd_dateStr, @"^(?<Year>\d{3})(?<Month>\d{2})(?<Day>\d{2})$"); //E.g.: 0801232 = 1980-12-31; 1811231 = 2080-12-31
@@ -367,7 +372,7 @@ namespace Ebcdic2Unicode
 
                     DateTime tempDate = new DateTime(year, month, day);
                     isParsedSuccessfully = true;
-                    return tempDate.ToString(yyyy_MM_dd);
+                    return tempDate.ToString(Formats.YYYY_MM_DD);
                 }
                 catch { }
             }
@@ -402,7 +407,7 @@ namespace Ebcdic2Unicode
             else
             {
                 //Just in case
-                throw new Exception(String.Format("Incorrect number of bytes provided for a binary field: {1}", decimalPlaces));
+                throw new Exception(String.Format(Messages.IncorrectNumberOfBytes, decimalPlaces));
             }
 
             string result = this.AdjustDecimals(tempNum, decimalPlaces);
@@ -434,7 +439,7 @@ namespace Ebcdic2Unicode
             {
                 //Every byte is either 0x00 or 0xFF (fillers)
                 isParsedSuccessfully = true;
-                return "";
+                return string.Empty;
             }
 
             long lo = 0;
@@ -511,12 +516,12 @@ namespace Ebcdic2Unicode
 
         public XElement ToXml(bool includeSrcBytesInHex = false)
         {
-            XElement element = new XElement("field");
-            element.Add(new XAttribute("Name", this.Template.FieldName));
+            XElement element = new XElement(Fields.XmlFields);
+            element.Add(new XAttribute(Fields.Name, this.Template.FieldName));
 
             if (includeSrcBytesInHex)
             {
-                element.Add(new XAttribute("SrcHex", this.OriginalBytesBase16)); //For testing
+                element.Add(new XAttribute(Fields.SrcHex, this.OriginalBytesBase16)); //For testing
             }
 
             if (this.Template.Type != FieldType.StringEncIbm935)
