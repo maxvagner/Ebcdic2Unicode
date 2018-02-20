@@ -34,6 +34,5 @@
         public const string LineTemplateRequired = "Line template is required.";
         public const string FieldTemplatesNotDefined = "Field templates have not been defined in the line template.";
         public const string InvalidFieldName = "Field name is NULL or empty.";
-        public const string xx = ".";
     }
 }
