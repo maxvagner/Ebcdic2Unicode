@@ -35,6 +35,9 @@ namespace Ebcdic2Unicode
         SourceBytesBase2,    
 
         /// <summary>EBCDIC text (IBM935 encoding). English: 1 byte per char. Chinese: 2 bytes per char</summary>
-        StringEncIbm935  
+        StringEncIbm935,
+
+        /// <summary>ASCII text</summary>
+        StringUnicode
     }
 }

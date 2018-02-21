@@ -41,6 +41,7 @@ namespace Ebcdic2Unicode
             }
         }
 
+        // TODO: What's the purpose of this property??
         public bool ParsedSuccessfully { get; private set; }
 
 
@@ -80,59 +81,66 @@ namespace Ebcdic2Unicode
             Array.Copy(lineBytes, fieldTemplate.StartPosition, fieldBytes, 0, fieldTemplate.FieldSize);
             this.OriginalBytes = fieldBytes;
 
-            if (fieldTemplate.Type == FieldType.String)
+            string result = string.Empty;
+            isParsedSuccessfully = true;
+
+            switch (fieldTemplate.Type)
             {
-                isParsedSuccessfully = true;
-                return this.ConvertEbcdicString(fieldBytes);
+                case FieldType.String:
+                    result = this.ConvertEbcdicString(fieldBytes);
+                    break;
+
+                case FieldType.NumericString:
+                    result = this.ConvertEbcdicNumericString(fieldBytes, fieldTemplate.DecimalPlaces, out isParsedSuccessfully);
+                    break;
+
+                case FieldType.Packed:
+                    result = this.Unpack(fieldBytes, fieldTemplate.DecimalPlaces, out isParsedSuccessfully);
+                    break;
+
+                case FieldType.BinaryNum:
+                    result = this.ConvertBinaryNumber(fieldBytes, fieldTemplate.DecimalPlaces, out isParsedSuccessfully);
+                    break;
+
+                case FieldType.PackedDate:
+                    result = this.ConvertMainframePackedDate(fieldBytes, out isParsedSuccessfully);
+                    break;
+
+                case FieldType.DateString:
+                    result = ConvertEbcdicDateString(fieldBytes, out isParsedSuccessfully);
+                    break;
+
+                case FieldType.DateStringMMDDYY:
+                    result = this.ConvertEbcdicCustomDateStr(fieldBytes, Formats.MMDDYY, Formats.YYYY_MM_DD, out isParsedSuccessfully);
+                    break;
+
+                case FieldType.SourceBytesBase16:
+                    result = ParserUtilities.ConvertBytesToStringBase16(fieldBytes);
+                    break;
+
+                case FieldType.SourceBytesBase10:
+                    result = ParserUtilities.ConvertBytesToStringBase10(fieldBytes);
+                    break;
+
+                case FieldType.SourceBytesBase2:
+                    result = ParserUtilities.ConvertBytesToStringBase2(fieldBytes);
+                    break;
+
+                case FieldType.StringEncIbm935:
+                    result = CustomIbm935Mapper.GetUnicodeString(fieldBytes).Trim();
+                    break;
+
+                case FieldType.StringUnicode:
+                    result = System.Text.Encoding.Default.GetString(fieldBytes);
+                    break;
+
+                default:
+                    isParsedSuccessfully = false;
+                    new Exception(String.Format(Messages.ParserNotImplemented, fieldTemplate.FieldName, fieldTemplate.Type.ToString()));
+                    break;
             }
-            else if (fieldTemplate.Type == FieldType.NumericString)
-            {
-                return this.ConvertEbcdicNumericString(fieldBytes, fieldTemplate.DecimalPlaces, out isParsedSuccessfully);
-            }
-            else if (fieldTemplate.Type == FieldType.Packed)
-            {
-                return this.Unpack(fieldBytes, fieldTemplate.DecimalPlaces, out isParsedSuccessfully);
-            }
-            else if (fieldTemplate.Type == FieldType.BinaryNum)
-            {
-                return this.ConvertBinaryNumber(fieldBytes, fieldTemplate.DecimalPlaces, out isParsedSuccessfully);
-            }
-            else if (fieldTemplate.Type == FieldType.PackedDate)
-            {
-                return this.ConvertMainframePackedDate(fieldBytes, out isParsedSuccessfully);
-            }
-            else if (fieldTemplate.Type == FieldType.DateString)
-            {
-                return ConvertEbcdicDateString(fieldBytes, out isParsedSuccessfully);
-            }
-            else if (fieldTemplate.Type == FieldType.DateStringMMDDYY)
-            {
-                return this.ConvertEbcdicCustomDateStr(fieldBytes, Formats.MMDDYY, Formats.YYYY_MM_DD, out isParsedSuccessfully);
-            }
-            else if (fieldTemplate.Type == FieldType.SourceBytesBase16)
-            {
-                isParsedSuccessfully = true;
-                return ParserUtilities.ConvertBytesToStringBase16(fieldBytes);
-            }
-            else if (fieldTemplate.Type == FieldType.SourceBytesBase10)
-            {
-                isParsedSuccessfully = true;
-                return ParserUtilities.ConvertBytesToStringBase10(fieldBytes);
-            }
-            else if (fieldTemplate.Type == FieldType.SourceBytesBase2)
-            {
-                isParsedSuccessfully = true;
-                return ParserUtilities.ConvertBytesToStringBase2(fieldBytes);
-            }
-            else if (fieldTemplate.Type == FieldType.StringEncIbm935)
-            {
-                isParsedSuccessfully = true;
-                return CustomIbm935Mapper.GetUnicodeString(fieldBytes).Trim();
-            }
-            else
-            {
-                throw new Exception(String.Format(Messages.ParserNotImplemented, fieldTemplate.FieldName, fieldTemplate.Type.ToString()));
-            }
+
+            return result;
         }
 
         private string ConvertEbcdicString(byte[] ebcdicBytes)
