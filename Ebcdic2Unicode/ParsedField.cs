@@ -63,7 +63,7 @@ namespace Ebcdic2Unicode
             }
         }
 
-
+        // TODO: PasedField should be like a data transfer object. Move parsing logic into dedicated class.
         private string ParseField(byte[] lineBytes, FieldTemplate fieldTemplate, out bool isParsedSuccessfully)
         {
             if (lineBytes == null || lineBytes.Length == 0)

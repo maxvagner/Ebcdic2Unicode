@@ -50,7 +50,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LineTemplateUnitTests.cs" />
-    <Compile Include="TestData.cs" />
+    <Compile Include="ParserUtilitiesTests.cs" />
+    <Compile Include="TestData\TestData.cs" />
     <Compile Include="ParserUnitTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

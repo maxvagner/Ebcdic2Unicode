@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
@@ -10,25 +11,72 @@ namespace Ebcdic2Unicode.UnitTests
 
         private byte[] sourceBytes;
         private LineTemplate lineTemplate;
-        private EbcdicParser parser;
+        private EbcdicParser processor;
 
         [TestInitialize]
         public void Init()
         {
             sourceBytes = TestData.GetSampleEbcidicDataWithFixedRecordLength();
             lineTemplate = TestData.GetLineTemplateToParseEbcidicDataWithFixedRecordLength();
-            parser = new EbcdicParser();
         }
 
         [TestMethod]
         public void ParseAllLines_ParsesTestData()
         {
-            ParsedLine[] parsedLines = parser.ParseAllLines(lineTemplate, sourceBytes);
+            // ASSERT:
+            // Processor can parse the whole file at once.
+
+            Assert.IsNotNull(sourceBytes);
+            Assert.IsTrue(sourceBytes.Any());
+
+            processor = new EbcdicParser();
+            ParsedLine[] parsedLines = processor.ParseAllLines(lineTemplate, sourceBytes);
 
             Assert.IsNotNull(parsedLines);
-            Assert.IsTrue(parsedLines.Any());
+            Assert.IsTrue(parsedLines.Length > 1);
 
-            var firstRecord = parsedLines.First();
+            AssertDataForTheFirstRecord(parsedLines.First());
+        }
+
+        [TestMethod]
+        public void ParseSingleLine_ParsesTestData()
+        {
+            // ASSERT:
+            // Processor can parse individual line.
+
+            Assert.IsNotNull(sourceBytes);
+            Assert.IsTrue(sourceBytes.Any());
+
+            processor = new EbcdicParser();
+
+            int count = 0;
+            int position = 0;
+
+            while (position < sourceBytes.Length)
+            {
+                byte[] lineBytes = ParserUtilities.ReadBytesRange(
+                    sourceBytes, 
+                    length: lineTemplate.LineSize, 
+                    startPosition: position);
+
+                position += lineTemplate.LineSize;
+
+                var parsedLine = processor.ParseSingleLine(lineTemplate, lineBytes);
+
+                if (count == 0)
+                {
+                    AssertDataForTheFirstRecord(parsedLine);
+                }
+
+                Debug.WriteLine(parsedLine.ToXmlString());
+                count++;
+            }
+
+            Assert.IsTrue(count > 1);
+        }
+
+        private void AssertDataForTheFirstRecord(ParsedLine firstRecord)
+        {
             Assert.IsTrue(firstRecord[TestData.FieldReservationNumber].Equals("04416365US2"));
             Assert.IsTrue(firstRecord[TestData.FieldCheckInDate].Equals("2015-01-23"));
             Assert.IsTrue(firstRecord[TestData.FieldCalcNetAmount].Equals("437.39"));
@@ -37,7 +85,6 @@ namespace Ebcdic2Unicode.UnitTests
             Assert.IsTrue(firstRecord[TestData.FieldCurrencyConvRate].Equals("0.762728"));
             Assert.IsTrue(firstRecord[TestData.FieldUsDollarAmountDue].Equals("220.26"));
             Assert.IsTrue(firstRecord[TestData.FieldDateOfBirth].Equals("1972-08-09"));
-
         }
     }
 }

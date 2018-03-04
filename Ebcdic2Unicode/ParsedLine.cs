@@ -9,40 +9,29 @@ namespace Ebcdic2Unicode
 {
     public class ParsedLine
     {
-        public LineTemplate Template { get; private set; }
-        public Dictionary<string, ParsedField> ParsedFields = new Dictionary<string, ParsedField>();
+        public LineTemplate Template
+        {
+            get;
+        }
+
+        public Dictionary<string, ParsedField> ParsedFields
+        {
+            get;
+        }
 
         public string this[string fieldName]
         {
             get
             {
-                ParsedField field = this.ParsedFields[fieldName];
-                return field.Text.Trim();
+                return this.ParsedFields[fieldName].Text.Trim();
             }
         }
-
-        public string this[int fieldIndex]
-        {
-            get
-            {
-                int count = 0;
-                foreach (ParsedField parsedField in this.ParsedFields.Values)
-                {
-                    if (count == fieldIndex)
-                    {
-                        return parsedField.Text.Trim();
-                    }
-                    count++;
-                }
-                throw new IndexOutOfRangeException();
-            }
-        }
-
 
 
         //Constructor
         public ParsedLine(LineTemplate template, byte[] lineBytes)
         {
+            this.ParsedFields = new Dictionary<string, ParsedField>();
             this.Template = template;
             this.ParseLine(lineBytes, template);
         }
@@ -54,7 +43,7 @@ namespace Ebcdic2Unicode
 
             foreach (var fieldTemplate in lineTemplate.FieldTemplates)
             {
-                ParsedField parsedField = new ParsedField(lineBytes, lineTemplate.FieldTemplates[fieldTemplate.Key]);
+                var parsedField = new ParsedField(lineBytes, lineTemplate.FieldTemplates[fieldTemplate.Key]);
                 this.ParsedFields.Add(fieldTemplate.Key, parsedField);
             }
         }
@@ -64,11 +53,6 @@ namespace Ebcdic2Unicode
             if (lineBytes == null)
             {
                 throw new ArgumentNullException(Messages.LineBytesRequired);
-            }
-            if (lineBytes.Length < template.LineSize)
-            {
-                //TODO:Do something maybe??
-                Console.WriteLine(String.Format("Bytes provided: {0}, line size: {1}", lineBytes.Length, template.LineSize));
             }
             if (template == null)
             {
@@ -82,14 +66,16 @@ namespace Ebcdic2Unicode
 
         public string[] GetFieldValues(bool addQuotes)
         {
-            var query = (from f in ParsedFields.Values
-                         select String.Format("{1}{0}{1}", f.Text.Replace("\"", "").Trim(), addQuotes ? "\"" : String.Empty)).ToArray();
-            return query;
+            var output = ParsedFields.Values
+                .Select(f => string.Format("{1}{0}{1}", f.Text.Replace("\"", "").Trim(), addQuotes ? "\"" : string.Empty))
+                .ToArray();
+
+            return output;
         }
 
         public string GetField(string fieldName)
         {
-            if (String.IsNullOrWhiteSpace(fieldName))
+            if (string.IsNullOrWhiteSpace(fieldName))
             {
                 throw new Exception(Messages.InvalidFieldName);
             }
@@ -98,7 +84,7 @@ namespace Ebcdic2Unicode
 
         public string GetField(string fieldName, bool surroundWithQuotes)
         {
-            return String.Format("\"{0}\"", this.GetField(fieldName));
+            return string.Format("\"{0}\"", this.GetField(fieldName));
         }
 
         public string GetField(string fieldName, bool surroundWithQuotes, int paddedLength)
@@ -110,7 +96,7 @@ namespace Ebcdic2Unicode
 
             if (surroundWithQuotes)
             {
-                return String.Format("\"{0}\"", this.GetField(fieldName).PadRight(paddedLength));
+                return string.Format("\"{0}\"", this.GetField(fieldName).PadRight(paddedLength));
             }
             else
             {
@@ -120,13 +106,13 @@ namespace Ebcdic2Unicode
 
         public XElement ToXml(bool includeSrcBytesInHex = false)
         {
-            XElement lineEl = new XElement(Fields.XmlLine);
+            var lineEl = new XElement(Fields.XmlLine);
             lineEl.Add(new XAttribute(Fields.TemplateName, this.Template.LineTemplateName));
 
-            XElement fields = new XElement(Fields.XmlFields);
+            var fields = new XElement(Fields.XmlFields);
             lineEl.Add(fields);
 
-            foreach (ParsedField parsedField in this.ParsedFields.Values)
+            foreach (var parsedField in this.ParsedFields.Values)
             {
                 fields.Add(parsedField.ToXml(includeSrcBytesInHex));
             }
@@ -141,10 +127,10 @@ namespace Ebcdic2Unicode
 
         public string ToCsvString(bool addQuotes = true, char separator = ',')
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             bool addSeparator = false;
 
-            foreach (ParsedField parsedField in this.ParsedFields.Values)
+            foreach (var parsedField in this.ParsedFields.Values)
             {
                 if (addSeparator)
                 {

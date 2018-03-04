@@ -19,39 +19,21 @@ namespace Ebcdic2Unicode.UnitTests
         public const string FieldUsDollarAmountDue = "US-DOLLAR-AMOUNT-DUE";
         public const string FieldDateOfBirth = "DATE-OF-BIRTH";
 
+        public const int LineSize = 73;
+        public const string TemplateName = "ReservationsData";
+
         public static LineTemplate GetLineTemplateToParseEbcidicDataWithFixedRecordLength()
         {
-            var lineTemplate = new LineTemplate(73, "ReservationsData");
-            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldReservationNumber, FieldType.String, 0, 11));
-            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldCheckInDate, FieldType.DateString, 11, 6));
-            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldCalcNetAmount, FieldType.BinaryNum, 17, 4, 2));
-            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldCustomerName, FieldType.String, 21, 30));
-            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldRunDate, FieldType.DateStringMMDDYY, 51, 6));
-            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldCurrencyConvRate, FieldType.Packed, 57, 6, 6));
-            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldUsDollarAmountDue, FieldType.Packed, 63, 6, 2));
-            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldDateOfBirth, FieldType.PackedDate, 69, 4));
+            var lineTemplate = new LineTemplate(LineSize, TemplateName);
+            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldReservationNumber, FieldType.String, startPosition: 0, fieldSize: 11));
+            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldCheckInDate, FieldType.DateString, startPosition: 11, fieldSize: 6));
+            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldCalcNetAmount, FieldType.BinaryNum, startPosition: 17, fieldSize: 4, decimalPlaces: 2));
+            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldCustomerName, FieldType.String, startPosition: 21, fieldSize: 30));
+            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldRunDate, FieldType.DateStringMMDDYY, startPosition: 51, fieldSize: 6));
+            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldCurrencyConvRate, FieldType.Packed, startPosition: 57, fieldSize: 6, decimalPlaces: 6));
+            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldUsDollarAmountDue, FieldType.Packed, startPosition: 63, fieldSize: 6, decimalPlaces: 2));
+            lineTemplate.AddFieldTemplate(new FieldTemplate(FieldDateOfBirth, FieldType.PackedDate, startPosition: 69, fieldSize: 4));
             return lineTemplate;
-        }
-
-        public static LineTemplate GetLineTemplateToParseEbcidicDataWithFixedRecordLengthFromXml()
-        {
-            var xmlString = GetLineTemplateToParseEbcidicDataWithFixedRecordLength().GetLineTemplateXmlString();
-            //"<lineTemplate Name=\"ReservationsData\" Length=\"73\">" +
-            //"  <fields>" +
-            //"    <fieldTemplate Name=\""+ FieldReservationNumber + "\" Type=\"String\" StartPosition=\"0\" Size=\"11\" />" +
-            //"    <fieldTemplate Name=\""+ FieldCheckInDate + "\" Type=\"DateString\" StartPosition=\"11\" Size=\"6\" />" +
-            //"    <fieldTemplate Name=\""+ FieldCalcNetAmount + "\" Type=\"BinaryNum\" StartPosition=\"17\" Size=\"4\" DecimalPlaces=\"2\" />" +
-            //"    <fieldTemplate Name=\""+ FieldCustomerName + "\" Type=\"String\" StartPosition=\"21\" Size=\"30\" />" +
-            //"    <fieldTemplate Name=\""+ FieldRunDate + "\" Type=\"DateStringMMDDYY\" StartPosition=\"51\" Size=\"6\" />" +
-            //"    <fieldTemplate Name=\""+ FieldCurrencyConvRate + "\" Type=\"Packed\" StartPosition=\"57\" Size=\"6\" DecimalPlaces=\"6\" />" +
-            //"    <fieldTemplate Name=\""+ FieldUsDollarAmountDue + "\" Type=\"Packed\" StartPosition=\"63\" Size=\"6\" DecimalPlaces=\"2\" />" +
-            //"    <fieldTemplate Name=\""+ FieldDateOfBirth + "\" Type=\"PackedDate\" StartPosition=\"69\" Size=\"4\" />" +
-            //"  </fields>" +
-            //"</lineTemplate>";
-
-            var lineTemplateXml = XElement.Parse(xmlString);
-
-            return new LineTemplate(lineTemplateXml);
         }
 
 

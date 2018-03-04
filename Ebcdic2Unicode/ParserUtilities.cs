@@ -9,6 +9,14 @@ namespace Ebcdic2Unicode
 {
     public static class ParserUtilities
     {
+        /// <summary>
+        /// Gets a sub-array from an existing array
+        /// </summary>
+        /// <param name="sourceBytes">Input bytes</param>
+        /// <param name="startPosition">Start index</param>
+        /// <param name="length">Size of the output array</param>
+        /// <param name="throwExceptionIfSourceArrayIsTooShort"></param>
+        /// <returns>Slice of an array</returns>
         public static byte[] ReadBytesRange(byte[] sourceBytes, int startPosition, int length, bool throwExceptionIfSourceArrayIsTooShort = true)
         {
             byte[] resultBytes;
