@@ -13,7 +13,7 @@ namespace Ebcdic2Unicode.UnitTests
 
 
         [TestMethod]
-        public void ParserUtilities_ReadBytesRange_ReturnsCorrwctBytes()
+        public void ParserUtilities_ReadBytesRange_ReturnsSlicedArray()
         {
             // ASSERT:
             // Method returns a slice of the input array
