@@ -53,7 +53,7 @@ namespace Ebcdic2Unicode
             }
 
             byte[] lineBytes = new byte[lineTemplate.LineSize];
-            List<ParsedLine> linesList = new List<ParsedLine>();
+            ParsedLine[] linesList = new ParsedLine[Convert.ToInt32(expectedRows)];
             ParsedLine parsedLine = null;
             int lineIndex = 0;
 
@@ -67,7 +67,7 @@ namespace Ebcdic2Unicode
 
                     if (parsedLine != null)
                     {
-                        linesList.Add(parsedLine);
+                        linesList[lineIndex] = parsedLine;
                     }
 
                     lineIndex++;
@@ -85,7 +85,7 @@ namespace Ebcdic2Unicode
                 }
             }
             Console.WriteLine("{1}: {0} line(s) have been parsed", linesList.Count(), DateTime.Now);
-            return linesList.ToArray();
+            return linesList;
         }
 
         /// <summary>

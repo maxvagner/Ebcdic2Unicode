@@ -31,7 +31,7 @@ namespace Ebcdic2Unicode
         //Constructor
         public ParsedLine(LineTemplate template, byte[] lineBytes)
         {
-            this.ParsedFields = new Dictionary<string, ParsedField>();
+            this.ParsedFields = new Dictionary<string, ParsedField>(template.FieldsCount);
             this.Template = template;
             this.ParseLine(lineBytes, template);
         }
