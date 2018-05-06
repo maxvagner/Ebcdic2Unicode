@@ -73,16 +73,12 @@ namespace Ebcdic2Unicode
             {
                 if (fieldSize != 1 && fieldSize != 2 && fieldSize != 4)
                 {
-                    throw new Exception(String.Format(Messages.InvalidInputBytes, fieldName, fieldSize));
+                    throw new ArgumentException(String.Format(Messages.InvalidInputBytes, fieldName, fieldSize));
                 }
             }
             if (decimalPlaces < 0)
             {
                 throw new ArgumentOutOfRangeException(String.Format(Messages.NegativeDecimalPlaces, fieldName));
-            }
-            if (decimalPlaces > 6)
-            {
-                throw new ArgumentOutOfRangeException(String.Format(Messages.DecimalPlacesLimitExceeded, fieldName));
             }
         }
 

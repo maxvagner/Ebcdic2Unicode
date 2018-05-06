@@ -49,7 +49,9 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ParserValidationTests.cs" />
     <Compile Include="LineTemplateUnitTests.cs" />
+    <Compile Include="FieldTemplateValidationTests.cs" />
     <Compile Include="ParserUtilitiesTests.cs" />
     <Compile Include="TestData\TestData.cs" />
     <Compile Include="ParserUnitTests.cs" />
