@@ -8,34 +8,34 @@ namespace Ebcdic2Unicode.UnitTests
     [TestClass]
     public class ParserUnitTests
     {
-
-        private byte[] sourceBytes;
-        private LineTemplate lineTemplate;
-        private EbcdicParser processor;
-
-        [TestInitialize]
-        public void Init()
-        {
-            sourceBytes = TestData.GetSampleEbcidicDataWithFixedRecordLength();
-            lineTemplate = TestData.GetLineTemplateToParseEbcidicDataWithFixedRecordLength();
-        }
-
         [TestMethod]
         public void ParseAllLines_ParsesTestData()
         {
             // ASSERT:
             // Processor can parse the whole file at once.
 
+            var sourceBytes = TestData.GetSampleEbcidicDataWithFixedRecordLength();
+            var lineTemplate = TestData.GetLineTemplateToParseEbcidicDataWithFixedRecordLength();
+
             Assert.IsNotNull(sourceBytes);
             Assert.IsTrue(sourceBytes.Any());
 
-            processor = new EbcdicParser();
+            var processor = new EbcdicParser();
             ParsedLine[] parsedLines = processor.ParseAllLines(lineTemplate, sourceBytes);
 
             Assert.IsNotNull(parsedLines);
             Assert.IsTrue(parsedLines.Length > 1);
 
-            AssertDataForTheFirstRecord(parsedLines.First());
+            var parsedLine = parsedLines.First();
+
+            Assert.IsTrue(parsedLine[TestData.FieldReservationNumber].Equals("04416365US2"));
+            Assert.IsTrue(parsedLine[TestData.FieldCheckInDate].Equals("2015-01-23"));
+            Assert.IsTrue(parsedLine[TestData.FieldCalcNetAmount].Equals("437.39"));
+            Assert.IsTrue(parsedLine[TestData.FieldCustomerName].Equals("KAY KENG,LOW"));
+            Assert.IsTrue(parsedLine[TestData.FieldRunDate].Equals("2015-01-28"));
+            Assert.IsTrue(parsedLine[TestData.FieldCurrencyConvRate].Equals("0.762728"));
+            Assert.IsTrue(parsedLine[TestData.FieldUsDollarAmountDue].Equals("220.26"));
+            Assert.IsTrue(parsedLine[TestData.FieldDateOfBirth].Equals("1972-08-09"));
         }
 
         [TestMethod]
@@ -44,10 +44,13 @@ namespace Ebcdic2Unicode.UnitTests
             // ASSERT:
             // Processor can parse individual line.
 
+            var sourceBytes = TestData.GetSampleEbcidicDataWithFixedRecordLength();
+            var lineTemplate = TestData.GetLineTemplateToParseEbcidicDataWithFixedRecordLength();
+
             Assert.IsNotNull(sourceBytes);
             Assert.IsTrue(sourceBytes.Any());
 
-            processor = new EbcdicParser();
+            var processor = new EbcdicParser();
 
             int count = 0;
             int position = 0;
@@ -65,7 +68,14 @@ namespace Ebcdic2Unicode.UnitTests
 
                 if (count == 0)
                 {
-                    AssertDataForTheFirstRecord(parsedLine);
+                    Assert.IsTrue(parsedLine[TestData.FieldReservationNumber].Equals("04416365US2"));
+                    Assert.IsTrue(parsedLine[TestData.FieldCheckInDate].Equals("2015-01-23"));
+                    Assert.IsTrue(parsedLine[TestData.FieldCalcNetAmount].Equals("437.39"));
+                    Assert.IsTrue(parsedLine[TestData.FieldCustomerName].Equals("KAY KENG,LOW"));
+                    Assert.IsTrue(parsedLine[TestData.FieldRunDate].Equals("2015-01-28"));
+                    Assert.IsTrue(parsedLine[TestData.FieldCurrencyConvRate].Equals("0.762728"));
+                    Assert.IsTrue(parsedLine[TestData.FieldUsDollarAmountDue].Equals("220.26"));
+                    Assert.IsTrue(parsedLine[TestData.FieldDateOfBirth].Equals("1972-08-09"));
                 }
 
                 Debug.WriteLine(parsedLine.ToXmlString());
@@ -75,16 +85,29 @@ namespace Ebcdic2Unicode.UnitTests
             Assert.IsTrue(count > 1);
         }
 
-        private void AssertDataForTheFirstRecord(ParsedLine firstRecord)
+        [Ignore]
+        [TestMethod]
+        public void Used_For_Manual_Testing()
         {
-            Assert.IsTrue(firstRecord[TestData.FieldReservationNumber].Equals("04416365US2"));
-            Assert.IsTrue(firstRecord[TestData.FieldCheckInDate].Equals("2015-01-23"));
-            Assert.IsTrue(firstRecord[TestData.FieldCalcNetAmount].Equals("437.39"));
-            Assert.IsTrue(firstRecord[TestData.FieldCustomerName].Equals("KAY KENG,LOW"));
-            Assert.IsTrue(firstRecord[TestData.FieldRunDate].Equals("2015-01-28"));
-            Assert.IsTrue(firstRecord[TestData.FieldCurrencyConvRate].Equals("0.762728"));
-            Assert.IsTrue(firstRecord[TestData.FieldUsDollarAmountDue].Equals("220.26"));
-            Assert.IsTrue(firstRecord[TestData.FieldDateOfBirth].Equals("1972-08-09"));
+            var lineBytes = ParserUtilities.ConvertHexStringToByteArray("F1-F5-F0-F1-F2-F3");
+            var lineTemplate = new LineTemplate(lineBytes.Length);
+            var fieldName = "TEST_ITEM";
+
+            lineTemplate.AddFieldTemplate(
+                new FieldTemplate(
+                    fieldName: fieldName, 
+                    fieldType: FieldType.DateString, 
+                    startPosition: 0, 
+                    fieldSize: lineBytes.Length,
+                    decimalPlaces: 0));
+
+            var processor = new EbcdicParser();
+
+            var parsedLine = processor.ParseSingleLine(lineTemplate, lineBytes);
+
+            var testOutput = parsedLine[fieldName];
+
+            Debug.WriteLine(parsedLine.ToXmlString());
         }
     }
 }

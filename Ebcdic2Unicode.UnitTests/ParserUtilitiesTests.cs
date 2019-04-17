@@ -31,5 +31,30 @@ namespace Ebcdic2Unicode.UnitTests
                 Assert.IsTrue(result[i] == expected[i]);
             } 
         }
+
+        [TestMethod]
+        public void ParserUtilities_ConvertHexStringToByteArray_ReturnsByteArray()
+        {
+            // ASSERT:
+            // Method converts HEX string into byte array
+
+            string[] inputs = {
+                "01-42-CC-6A",
+                "01 42 CC 6A",
+                "0142CC6A",
+                "0142cc6a"
+            };
+            byte[] expected = { 1, 66, 204, 106 };
+
+            foreach(var input in inputs)
+            {
+                byte[] result = ParserUtilities.ConvertHexStringToByteArray(input);
+
+                Assert.IsNotNull(result);
+                Assert.IsTrue(result.Any());
+                Assert.IsTrue(result.Length == expected.Length);
+                Assert.IsTrue(expected.SequenceEqual(result));
+            }
+        }
     }
 }

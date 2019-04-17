@@ -87,13 +87,13 @@ namespace Ebcdic2Unicode
 
         public static byte[] ConvertHexStringToByteArray(string hex)
         {
-            if (hex.Length % 2 == 1)
+            string errorMsg;
+
+            hex = CleanHexString(hex);
+
+            if (!IsValidHexString(hex, out errorMsg))
             {
-                throw new Exception("HEX string is not valid. String cannot contain odd number of digits");
-            }
-            if (Regex.IsMatch(hex, @"[^0-9A-F]"))
-            {
-                throw new Exception("HEX string contains invalid chars. Use only 0-9 and A-F (upper case)");
+                throw new Exception(errorMsg);
             }
 
             byte[] arr = new byte[hex.Length / 2];
@@ -104,6 +104,39 @@ namespace Ebcdic2Unicode
             }
             return arr;
         }
+
+        private static string CleanHexString(string hex)
+        {
+            if (string.IsNullOrWhiteSpace(hex))
+            {
+                return hex;
+            }
+
+            return hex.Replace("-", string.Empty).Replace(" ", string.Empty).ToUpper();
+        }
+
+        private static bool IsValidHexString(string hex, out string errorMsg)
+        {
+            if (string.IsNullOrWhiteSpace(hex))
+            {
+                errorMsg = "HEX string is null or empty";
+                return false;
+            }
+            if (hex.Length % 2 == 1)
+            {
+                errorMsg = "HEX string is not valid. String cannot contain odd number of digits";
+                return false;
+            }
+            if (Regex.IsMatch(hex, @"[^0-9a-fA-F]"))
+            {
+                errorMsg = "HEX string contains invalid chars";
+                return false;
+            }
+            errorMsg = "";
+            return true;
+        }
+
+
 
         private static int ConvertHexCharToInt(char hex)
         {
